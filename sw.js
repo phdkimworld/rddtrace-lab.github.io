@@ -1,7 +1,7 @@
 // 앱 셸 서비스 워커. 빌드 때 vite.config.js의 sw-precache 플러그인이 아래 자리표시자를 실제 파일 목록·버전으로 바꾼다.
 // 모델 파일(huggingface.co)은 Transformers.js가 자체 캐시하므로 여기서는 같은 출처 요청만 다룬다.
-const VERSION = 'a44420c9090b';
-const PRECACHE = ["./","./assets/index-CFttXW0Q.css","./assets/index-JbE8uZRz.js","./assets/ort-wasm-simd-threaded.jsep-B0T3yYHD.wasm","./assets/pcm-worklet-D9Fv27wc.js","./assets/transcriber.worker-D1WIJTpN.js","./icons/icon-192.png","./icons/icon-512.png","./index.html","./manifest.webmanifest","./robots.txt"];
+const VERSION = '39f204c2d181';
+const PRECACHE = ["./","./assets/index-CFttXW0Q.css","./assets/index-Co5k8mpB.js","./assets/ort-wasm-simd-threaded.jsep-B0T3yYHD.wasm","./assets/pcm-worklet-D9Fv27wc.js","./assets/transcriber.worker-zlQceOjb.js","./icons/icon-192.png","./icons/icon-512.png","./index.html","./manifest.webmanifest","./robots.txt"];
 const CACHE = `shell-${VERSION}`;
 
 self.addEventListener('install', (e) => {
