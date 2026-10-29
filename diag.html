@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>녹음 전사 진단</title>
+<style>
+  body { font: 15px/1.5 system-ui, sans-serif; margin: 0; padding: 16px; background: #111418; color: #e8eaed; }
+  pre { white-space: pre-wrap; word-break: break-all; background: #1a1e24; padding: 12px; border-radius: 10px; }
+  button { font-size: 16px; padding: 10px 14px; margin: 6px 6px 0 0; border-radius: 10px; border: 1px solid #444; background: #242a32; color: #e8eaed; }
+</style>
+</head>
+<body>
+<h2>진단 페이지</h2>
+<p>이 화면이 보이면 브라우저 자체는 정상입니다. 아래 내용을 캡처해 주세요.</p>
+<pre id="out">확인 중…</pre>
+<button id="gpu">WebGPU 확인</button>
+<button id="reset">캐시·서비스워커 초기화</button>
+<script>
+// 앱 코드 없이 환경만 확인하는 독립 페이지
+const out = document.getElementById('out');
+const lines = [];
+const log = (k, v) => { lines.push(k + ': ' + v); out.textContent = lines.join('\n'); };
+log('UA', navigator.userAgent);
+log('deviceMemory(GB)', navigator.deviceMemory);
+log('cores', navigator.hardwareConcurrency);
+log('standalone', matchMedia('(display-mode: standalone)').matches);
+log('secureContext', isSecureContext);
+log('navigator.gpu', 'gpu' in navigator);
+try { log('modelGuard', localStorage.getItem('vr.modelGuard')); } catch (e) { log('localStorage', e.message); }
+(async () => {
+  try {
+    const regs = await navigator.serviceWorker?.getRegistrations();
+    log('serviceWorkers', regs ? regs.length : 'n/a');
+    log('caches', (await caches.keys()).join(', ') || '(없음)');
+    const est = await navigator.storage?.estimate();
+    if (est) log('storage', Math.round(est.usage / 1048576) + 'MB / ' + Math.round(est.quota / 1048576) + 'MB');
+  } catch (e) { log('err', e.message); }
+})();
+document.getElementById('gpu').onclick = async () => {
+  try {
+    const a = await navigator.gpu?.requestAdapter();
+    if (!a) return log('adapter', '없음');
+    const info = a.info || {};
+    log('adapter', [info.vendor, info.architecture, info.device, info.description].filter(Boolean).join(' / ') || '(정보 없음)');
+    log('shader-f16', a.features.has('shader-f16'));
+    log('maxBufferSize(MB)', Math.round(a.limits.maxBufferSize / 1048576));
+    log('maxStorageBufferBindingSize(MB)', Math.round(a.limits.maxStorageBufferBindingSize / 1048576));
+  } catch (e) { log('adapter err', e.message); }
+};
+document.getElementById('reset').onclick = async () => {
+  for (const r of (await navigator.serviceWorker?.getRegistrations()) || []) await r.unregister();
+  for (const k of await caches.keys()) if (k.startsWith('shell-')) await caches.delete(k);
+  try { localStorage.removeItem('vr.modelGuard'); } catch {}
+  log('reset', '완료 — 앱을 다시 열어 보세요');
+};
+</script>
+</body>
+</html>
